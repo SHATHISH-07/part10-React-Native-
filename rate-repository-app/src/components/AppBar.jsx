@@ -27,11 +27,25 @@ const AppBar = () => {
         <View style={styles.container}>
             <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
                 <AppBarTab text="Repositories" onPress={() => navigate("/")} />
+                {
+                    user && (<AppBarTab text="Create a Review" onPress={() => navigate("/createReview")} />)
+                }
+
+                {
+                    user && (<AppBarTab text="My Reviews" onPress={() => navigate("/userReview")} />)
+                }
+
+
                 {user ? (
                     <AppBarTab text="Sign Out" onPress={handleSignOut} />
                 ) : (
                     <AppBarTab text="Sign In" onPress={() => navigate("/signIn")} />
                 )}
+
+                {
+                    !user && (<AppBarTab text="Sign Up" onPress={() => navigate("/signUp")} />)
+                }
+
             </ScrollView>
         </View>
     );
@@ -41,7 +55,7 @@ const styles = StyleSheet.create({
     container: {
         paddingTop: Constants.statusBarHeight + 10,
         paddingBottom: 10,
-        paddingHorizontal: 10,
+        paddingHorizontal: 5,
         backgroundColor: '#24292e',
         fontFamily: theme.fonts.main,
 
@@ -49,7 +63,6 @@ const styles = StyleSheet.create({
     scrollContainer: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 130,
     }
 });
 

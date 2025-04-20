@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router-native';
 import { useFormik } from 'formik';
 import { Text, TextInput, Pressable, View, StyleSheet } from 'react-native';
 import theme from "../styles/theme";
-import useSignIn from '../hooks/useSignIn';
-import useAuthStorage from '../hooks/useStorage';
+import useSignUp from '../hooks/useSignUp';
 
-const SignInContainer = ({ values, handleChange, handleBlur, errors, touched, onSubmit }) => {
+const SignUpContainer = ({ values, handleChange, handleBlur, errors, touched, onSubmit }) => {
     return (
         <View style={styles.container}>
-            <Text style={styles.heading}>Sign In</Text>
+            <Text style={styles.heading}>Sign Up</Text>
 
             <View>
                 <TextInput
@@ -46,50 +45,77 @@ const SignInContainer = ({ values, handleChange, handleBlur, errors, touched, on
                 )}
             </View>
 
+            <View>
+                <TextInput
+                    placeholder='Repeat Password'
+                    onChangeText={handleChange('passwordConfirmation')}
+                    onBlur={handleBlur('passwordConfirmation')}
+                    value={values.passwordConfirmation}
+                    secureTextEntry
+                    testID='passwordConfirmationInput'
+                    style={[
+                        styles.input,
+                        touched.passwordConfirmation && errors.passwordConfirmation && { borderColor: '#d73a4a' }
+                    ]}
+                />
+                {touched.passwordConfirmation && errors.passwordConfirmation && (
+                    <Text style={styles.error}>{errors.passwordConfirmation}</Text>
+                )}
+            </View>
+
             <Pressable onPress={onSubmit} testID='submitButton' style={styles.button}>
-                <Text style={styles.buttonText}>Sign In</Text>
+                <Text style={styles.buttonText}>Sign Up</Text>
             </Pressable>
         </View>
     );
 };
 
-// 🚀 SignIn – logic component
-const SignIn = () => {
+const SignUp = () => {
     const navigate = useNavigate();
-    const authStorage = useAuthStorage();
-    const [signIn] = useSignIn();
+    const [signUp] = useSignUp();
 
-    const initialValue = {
+    const initialValues = {
         username: "",
         password: "",
+        passwordConfirmation: ""
     };
 
     const onSubmit = async (values, { resetForm }) => {
         const { username, password } = values;
         try {
-            const accessToken = await signIn({ username, password });
-            await authStorage.setAccessToken(accessToken);
-            console.log(accessToken);
+            await signUp({ username, password });
             resetForm();
             navigate("/");
         } catch (error) {
-            console.error("Login failed:", error.message);
+            console.error("Signup failed:", error.message);
         }
     };
 
     const validationSchema = yup.object().shape({
-        username: yup.string().min(3, "Username must be at least 3 characters").required("Username is required"),
-        password: yup.string().min(3, "Password must be at least 3 characters").required("Password is required"),
+        username: yup
+            .string()
+            .min(3, "Username must be at least 3 characters")
+            .max(30, "Username must be at most 30 characters")
+            .required("Username is required"),
+        password: yup
+            .string()
+            .min(3, "Password must be at least 3 characters")
+            .max(50, "Password must be at most 50 characters")
+            .required("Password is required"),
+        passwordConfirmation: yup
+            .string()
+            .oneOf([yup.ref('password'), null], "Passwords must match")
+            .required("Password confirmation is required")
     });
 
     const formik = useFormik({
-        initialValues: initialValue,
+        initialValues,
         validationSchema,
         onSubmit,
     });
 
     return (
-        <SignInContainer
+        <SignUpContainer
             values={formik.values}
             handleChange={formik.handleChange}
             handleBlur={formik.handleBlur}
@@ -146,5 +172,5 @@ const styles = StyleSheet.create({
     },
 });
 
-export default SignIn;
-export { SignInContainer }; 
+export default SignUp;
+export { SignUpContainer };

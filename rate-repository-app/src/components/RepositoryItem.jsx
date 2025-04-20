@@ -1,9 +1,12 @@
-import { View, Text, Image, StyleSheet } from 'react-native'
+import { View, Text, Image, StyleSheet, Pressable } from 'react-native'
 import React from 'react'
+import { useNavigate } from "react-router-native"
 import theme from "../styles/theme"
+import { Linking } from 'react-native';
 
+const RepositoryItem = ({ item, isSingle }) => {
 
-const RepositoryItem = ({ item }) => {
+    const navigate = useNavigate();
 
 
     const formatCount = (count) => {
@@ -12,41 +15,62 @@ const RepositoryItem = ({ item }) => {
             : count;
     };
 
+    const handleOpenLink = async () => {
+        const supported = await Linking.canOpenURL(item.url);
+        if (supported) {
+            Linking.openURL(item.url);
+        } else {
+            console.log("Can't open URL: ", item.url);
+        }
+    };
+
+
+
 
 
     return (
         <View style={styles.container}>
-            <View style={styles.sec1}>
-                <Image
-                    source={{ uri: item.ownerAvatarUrl }}
-                    style={styles.image}
-                />
-                <View style={styles.heading}>
-                    <Text style={styles.fullName}>{item.fullName}</Text>
-                    <Text style={styles.description}>{item.description}</Text>
-                    <Text style={styles.language}>{item.language}</Text>
+            <Pressable onPress={() => navigate(`/${item.id}`)}>
+                <View testID='repositoryItem' >
+                    <View style={styles.sec1}>
+                        <Image
+                            source={{ uri: item.ownerAvatarUrl }}
+                            style={styles.image}
+                        />
+                        <View style={styles.heading}>
+                            <Text style={styles.fullName}>{item.fullName}</Text>
+                            <Text style={styles.description}>{item.description}</Text>
+                            <Text style={styles.language}>{item.language}</Text>
+                        </View>
+                    </View>
+                    <View style={styles.sec2}>
+                        <View style={styles.statItem}>
+                            <Text style={styles.statValue}>{formatCount(item.stargazersCount)}</Text>
+                            <Text style={styles.statLabel}>Stars</Text>
+                        </View>
+                        <View style={styles.statItem}>
+                            <Text style={styles.statValue}>{formatCount(item.forksCount)}</Text>
+                            <Text style={styles.statLabel}>Forks</Text>
+                        </View>
+                        <View style={styles.statItem}>
+                            <Text style={styles.statValue}>{formatCount(item.reviewCount)}</Text>
+                            <Text style={styles.statLabel}>Reviews</Text>
+                        </View>
+                        <View style={styles.statItem}>
+                            <Text style={styles.statValue}>{formatCount(item.ratingAverage)}</Text>
+                            <Text style={styles.statLabel}>Rating</Text>
+                        </View>
+                    </View>
                 </View>
-            </View>
-            <View style={styles.sec2}>
-                <View style={styles.statItem}>
-                    <Text style={styles.statValue}>{formatCount(item.stargazersCount)}</Text>
-                    <Text style={styles.statLabel}>Stars</Text>
-                </View>
-                <View style={styles.statItem}>
-                    <Text style={styles.statValue}>{formatCount(item.forksCount)}</Text>
-                    <Text style={styles.statLabel}>Forks</Text>
-                </View>
-                <View style={styles.statItem}>
-                    <Text style={styles.statValue}>{formatCount(item.reviewCount)}</Text>
-                    <Text style={styles.statLabel}>Reviews</Text>
-                </View>
-                <View style={styles.statItem}>
-                    <Text style={styles.statValue}>{formatCount(item.ratingAverage)}</Text>
-                    <Text style={styles.statLabel}>Rating</Text>
-                </View>
-            </View>
-
-        </View>
+            </Pressable>
+            {
+                isSingle && (
+                    <Pressable style={styles.button} onPress={handleOpenLink}>
+                        <Text style={styles.buttonText}>Open in GitHub</Text>
+                    </Pressable>
+                )
+            }
+        </View >
     )
 }
 
@@ -125,7 +149,23 @@ const styles = StyleSheet.create({
     statValue: {
         fontWeight: "bold",
         fontSize: 16,
-    }
+    },
+    button: {
+        backgroundColor: "#228dff",
+        width: "100%",
+        height: 50,
+        padding: 10,
+        borderRadius: 6,
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 20,
+    },
+
+    buttonText: {
+        color: "#fff",
+        fontWeight: "bold",
+        fontSize: 17,
+    },
 
 });
 
